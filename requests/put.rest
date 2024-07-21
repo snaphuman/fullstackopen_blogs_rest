@@ -1,0 +1,9 @@
+PUT http://localhost:3001/api/blogs/669c4adc64d7fc2b42f6f502 HTTP/1.1
+Content-Type: application/json
+
+{
+    "title": "Foo Bar Baz",
+    "author": "Alice Malone",
+    "url": "http://my-blog.com",
+    "likes": 6
+}
