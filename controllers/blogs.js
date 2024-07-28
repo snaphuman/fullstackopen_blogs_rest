@@ -1,25 +1,26 @@
 const router = require('express').Router()
 const Blog = require('../models/blog')
 
-router.get('/', (req, res) => {
-    Blog.find({}).then(notes => {
-        res.json(notes)
-    })
+router.get('/', async (req, res) => {
+    const blogs = await Blog.find({})
+    res.json(blogs);
 })
 
-router.get('/:id', (req, res, next) => {
-    Blog.findById(req.params.id)
-        .then((blog) => {
-            if(blog) {
-                res.json(blog)
-            } else {
-                res.status(404).end()
-            }
-        })
-        .catch((error) => next(error))
+router.get('/:id', async (req, res, next) => {
+    try {
+        const blog = await Blog.findById(req.params.id)
+
+        if(blog) {
+            res.json(blog)
+        } else {
+            res.status(404).end()
+        }
+    } catch (error) {
+        next(error)
+    }
 })
 
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
     const { title, author, url, likes } = req.body;
 
     const blog = new Blog({
@@ -29,37 +30,48 @@ router.post('/', (req, res, next) => {
         likes,
     })
 
-    blog.save()
-        .then((saved) => {
-            res.json(saved)
-        })
-        .catch((error) => next(error))
+    if (!title) {
+        return res.status(400).json({
+            error: 'Title is missing'
+        }).end();
+    }
+
+    try {
+        const result = await blog.save()
+        res.status(201).json(result)
+    } catch (error) {
+        next(error)
+    }
 })
 
-router.delete('/:id', (req, res, next) => {
-    Blog.findByIdAndDelete(req.params.id)
-        .then(() => {
-            res.status(204).end()
-        })
-        .catch((error) => next(error))
+router.delete('/:id', async (req, res, next) => {
+    try {
+        await Blog.findByIdAndDelete(req.params.id)
+
+        res.status(204).end()
+    } catch(error) { 
+        next(error) 
+    }
 
 })
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id', async (req, res, next) => {
     const { title, author, url, likes } = req.body;
     const blog = { title, author, url, likes }
 
-    Blog.findByIdAndUpdate(
-        req.params.id, 
-        blog, {
-            new: true,
-            runValidators: true,
-            context: 'query'
-        })
-        .then((updated) => {
-            res.send(updated)
-        })
-        .catch((error) => next(error))
+    try {
+        const result = await Blog.findByIdAndUpdate(
+            req.params.id, 
+            blog, {
+                new: true,
+                runValidators: true,
+                context: 'query'
+            })
+
+        res.send(result)
+    } catch (error) {
+        next(error)
+    }
 })
 
 module.exports = router
