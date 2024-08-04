@@ -3,21 +3,24 @@ const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-const blog = require('../models/blog')
-
 const api = supertest(app)
-
-const blogsMock = require('../mocks/blogsMock')
 const Blog = require('../models/blog')
+const blogsMock = require('../mocks/blogsMock')
 const { blogsInDb, findBlogById } = require('./blogs_api_helper.test')
 
 describe('blogs API', () => {
+  const [blog1, blog2] = blogsMock
+  const items = [blog1, blog2]
+
   beforeEach(async () => {
-    await blog.deleteMany({})
-    let blogObj = new Blog(blogsMock[0])
-    await blogObj.save()
-    blogObj = new Blog(blogsMock[1])
-    await blogObj.save()
+    await Blog.deleteMany({})
+
+    const blogPromises = items.map(async (item) => {
+      const blogObj = new Blog(item)
+      return blogObj.save()
+    })
+
+    await Promise.all(blogPromises)
   })
 
   describe('/api/blogs', () => {
