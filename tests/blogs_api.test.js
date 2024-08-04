@@ -31,6 +31,13 @@ describe('blogs API', () => {
         .expect('Content-Type', /application\/json/)
     })
 
+    test('blogs identifier should be id', async () => {
+      const response = await api.get('/api/blogs')
+      response.body.forEach(blog =>
+        assert.strictEqual(blog.hasOwnProperty('id'), true)
+      )
+    })
+
     test('get blogs should return two elements', async () => {
       const response = await api.get('/api/blogs')
 
@@ -69,6 +76,41 @@ describe('blogs API', () => {
 
       assert.strictEqual(blogs.length, 2)
     })
+
+    test('validate error response for post blog without url and title', async () => {
+      const badBlog = {
+        author: 'bar',
+        likes: 1
+      }
+
+      const response = await api
+        .post('/api/blogs')
+        .send(badBlog)
+        .expect(400)
+
+      const blogs = await blogsInDb()
+
+      assert.strictEqual(response.body.error, 'Blog validation failed: title: Path `title` is required., url: Path `url` is required.')
+    })
+
+    test('create post without likes property should default to 0', async () => {
+      const noLikesBlog = {
+        title: 'Lorem Ipsum',
+        author: 'bar',
+        url: 'example.net',
+      }
+
+      const result = await api
+        .post('/api/blogs')
+        .send(noLikesBlog)
+        .expect(201)
+
+      const createdId = result.body.id
+
+      assert.strictEqual((await findBlogById(createdId)).likes, 0)
+
+
+    })
   })
 
   describe('/api/blogs/:id', () => {
@@ -105,6 +147,7 @@ describe('blogs API', () => {
 
 
     })
+
   })
   after(async () => {
     mongoose.connection.close()
