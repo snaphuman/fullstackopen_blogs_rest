@@ -6,8 +6,7 @@ router.get('/', async (req, res) => {
     res.json(blogs);
 })
 
-router.get('/:id', async (req, res, next) => {
-    try {
+router.get('/:id', async (req, res) => {
         const blog = await Blog.findById(req.params.id)
 
         if(blog) {
@@ -15,12 +14,9 @@ router.get('/:id', async (req, res, next) => {
         } else {
             res.status(404).end()
         }
-    } catch (error) {
-        next(error)
-    }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
     const { title, author, url, likes } = req.body;
 
     const blog = new Blog({
@@ -30,36 +26,20 @@ router.post('/', async (req, res, next) => {
         likes,
     })
 
-    if (!title) {
-        return res.status(400).json({
-            error: 'Title is missing'
-        }).end();
-    }
-
-    try {
         const result = await blog.save()
         res.status(201).json(result)
-    } catch (error) {
-        next(error)
-    }
 })
 
-router.delete('/:id', async (req, res, next) => {
-    try {
+router.delete('/:id', async (req, res) => {
         await Blog.findByIdAndDelete(req.params.id)
 
         res.status(204).end()
-    } catch(error) { 
-        next(error) 
-    }
-
 })
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', async (req, res) => {
     const { title, author, url, likes } = req.body;
     const blog = { title, author, url, likes }
 
-    try {
         const result = await Blog.findByIdAndUpdate(
             req.params.id, 
             blog, {
@@ -69,9 +49,6 @@ router.put('/:id', async (req, res, next) => {
             })
 
         res.send(result)
-    } catch (error) {
-        next(error)
-    }
 })
 
 module.exports = router
