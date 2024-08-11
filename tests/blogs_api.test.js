@@ -108,8 +108,6 @@ describe('blogs API', () => {
       const createdId = result.body.id
 
       assert.strictEqual((await findBlogById(createdId)).likes, 0)
-
-
     })
   })
 
