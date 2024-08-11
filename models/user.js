@@ -4,13 +4,17 @@ const schema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
+        unique: true,
     },
-    name: String,
+    name: {
+        type: String,
+        default: null,
+    },
     passwordHash: String,
     blogs: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Blog'
-    }
+    },
 })
 
 schema.set('toJSON', {

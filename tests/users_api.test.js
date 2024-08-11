@@ -20,13 +20,13 @@ describe('users API', () => {
     })
 
     describe('/api/users', () => {
-        test('should create new username', async () => {
+        test('post request should create new username', async () => {
             const initialUsers = await usersInDb()
 
             const user = {
                 username: 'fhernandez',
                 name: 'Fabian H',
-            password: '123test',
+                password: '123test',
             }
 
             const result = await api
@@ -40,6 +40,27 @@ describe('users API', () => {
 
             const usernames = finalUsers.map(u => u.username)
             assert(usernames.includes(user.username))
+       })
+
+       test('post request should validate id user has already taken', async() => {
+            const initialUsers = await usersInDb()
+
+            const user = {
+                username: 'root',
+                name: 'Super User',
+                password: '1234test'
+            }
+
+            const result = await api
+                .post('/api/users')
+                .send(user)
+                .expect(400)
+                .expect('Content-Type', /application\/json/)
+
+            const finalUsers = await usersInDb()
+
+            assert(result.body.error.includes('expected username to be unique'))
+            assert.strictEqual(initialUsers.length, finalUsers.length)
        })
     })
     after(async () => {
