@@ -11,10 +11,12 @@ const schema = new mongoose.Schema({
         default: null,
     },
     passwordHash: String,
-    blogs: {
+    blogs: [
+      {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Blog'
-    },
+      },
+    ]
 })
 
 schema.set('toJSON', {
