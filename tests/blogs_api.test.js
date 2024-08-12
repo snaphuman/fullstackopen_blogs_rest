@@ -7,6 +7,7 @@ const api = supertest(app)
 const Blog = require('../models/blog')
 const blogsMock = require('../mocks/blogsMock')
 const { blogsInDb, findBlogById } = require('./blogs_api_helper.test')
+const { usersInDb } = require('./users_api_helper.test')
 
 describe('blogs API', () => {
   const [blog1, blog2] = blogsMock
@@ -45,11 +46,13 @@ describe('blogs API', () => {
     })
 
     test('post blog should save one one blog', async () => {
-      const blog = new Blog(blogsMock[2])
+
+      const user = await usersInDb();
+      const blog = {...blogsMock[2], userId: user[0].id.toString()}
 
       await api
         .post('/api/blogs')
-        .send(blog.toJSON())
+        .send(blog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
@@ -61,10 +64,14 @@ describe('blogs API', () => {
     })
 
     test('post blog without title is not added', async () => {
+
+      const user = await usersInDb();
+
       const badBlog = {
         author: 'bar',
         url: 'example.net',
-        likes: 1
+        likes: 1,
+        userId: user[0].id.toString()
       }
 
       await api
@@ -78,9 +85,13 @@ describe('blogs API', () => {
     })
 
     test('validate error response for post blog without url and title', async () => {
+
+      const user = await usersInDb();
+
       const badBlog = {
         author: 'bar',
-        likes: 1
+        likes: 1,
+        userId: user[0].id.toString()
       }
 
       const response = await api
@@ -94,10 +105,14 @@ describe('blogs API', () => {
     })
 
     test('create post without likes property should default to 0', async () => {
+
+      const user = await usersInDb();
+
       const noLikesBlog = {
         title: 'Lorem Ipsum',
         author: 'bar',
         url: 'example.net',
+        userId: user[0].id.toString()
       }
 
       const result = await api
@@ -142,8 +157,6 @@ describe('blogs API', () => {
         .send(update)
 
       assert.strictEqual(response.body.title, title)
-
-
     })
 
   })
