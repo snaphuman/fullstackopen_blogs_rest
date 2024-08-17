@@ -6,6 +6,13 @@ const usersInDb = async () => {
     return users.map(user => user.toJSON())
 }
 
+const findUserByUsername = async (username) => {
+    const user = await User.findOne({username})
+
+    return user.toJSON()
+}
+
 module.exports = {
-    usersInDb
+    usersInDb,
+    findUserByUsername
 }
