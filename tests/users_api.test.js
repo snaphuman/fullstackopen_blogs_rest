@@ -62,6 +62,48 @@ describe('users API', () => {
             assert(result.body.error.includes('expected username to be unique'))
             assert.strictEqual(initialUsers.length, finalUsers.length)
        })
+
+       test('post request should validate if user has three characteds', async() => {
+            const initialUsers = await usersInDb()
+
+            const user = {
+                username: 'fo',
+                name: 'Bad User',
+                password: '1234test'
+            }
+
+            const result = await api
+                .post('/api/users')
+                .send(user)
+                .expect(401)
+                .expect('Content-Type', /application\/json/)
+
+            const finalUsers = await usersInDb()
+
+            assert(result.body.error.includes('expected username or password to have more than three chars'))
+            assert.strictEqual(initialUsers.length, finalUsers.length)
+       })
+
+       test('post request should validate if password has more than three characteds', async() => {
+            const initialUsers = await usersInDb()
+
+            const user = {
+                username: 'foooo',
+                name: 'Bad password',
+                password: '12'
+            }
+
+            const result = await api
+                .post('/api/users')
+                .send(user)
+                .expect(401)
+                .expect('Content-Type', /application\/json/)
+
+            const finalUsers = await usersInDb()
+
+            assert(result.body.error.includes('expected username or password to have more than three chars'))
+            assert.strictEqual(initialUsers.length, finalUsers.length)
+       })
     })
     after(async () => {
         mongoose.connection.close()
