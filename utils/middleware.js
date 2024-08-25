@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken')
 const logger = require('./logger')
 
 const requestLogger = (req, res, next) => {
@@ -42,9 +43,28 @@ const tokenExtractor = (req, res, next) => {
   next();
 }
 
+const tokenVerifier = (req, res, next) => {
+  const token = req.token
+  const isLogin = req.originalUrl.endsWith('login')
+
+  if (!isLogin && !token)  {
+    return res.status(401).json({ error: 'token no provided'})
+  }
+
+  if (!isLogin) {
+    const secret = process.env.SECRET
+    const verification = jwt.verify(token, secret)
+
+    req.verifiedToken = verification;
+  }
+
+  next()
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
-  tokenExtractor
+  tokenExtractor,
+  tokenVerifier,
 }

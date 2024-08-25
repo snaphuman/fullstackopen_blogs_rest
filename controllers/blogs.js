@@ -22,11 +22,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   const { title, author, url, likes, userId } = req.body
 
-  const token = req.token
-  const secret = process.env.SECRET
-  const decoded = jwt.verify(token, secret)
-
-  if(!decoded.id) {
+  if(!req.verifiedToken.id) {
     return res.status(401).json({error: 'token invalid'})
   }
 
@@ -48,6 +44,21 @@ router.post('/', async (req, res) => {
 })
 
 router.delete('/:id', async (req, res) => {
+  if(!req.verifiedToken.id) {
+    return res.status(401).json({error: 'token invalid'})
+  }
+
+  const blog = await Blog.findById(req.params.id)
+  const decodedToken = jwt.decode(req.token)
+
+  if(!blog) {
+    return res.status(401).json({error: 'blog not found'})
+  }
+
+  if(decodedToken.id !== blog.user.toString()) {
+    return res.status(401).json({error: 'no authorized to delete this blog'})
+  }
+
   await Blog.findByIdAndDelete(req.params.id)
 
   res.status(204).end()
