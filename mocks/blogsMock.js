@@ -4,7 +4,7 @@ const blogsMock = [
     title: 'React patterns',
     author: 'Michael Chan',
     url: 'https://reactpatterns.com/',
-    user: '66cbcac17838c3bf4093a728',
+    user: '66cbdb41cb3c840100a8a353',
     likes: 7,
     __v: 0
   },
@@ -13,6 +13,7 @@ const blogsMock = [
     title: 'Go To Statement Considered Harmful',
     author: 'Edsger W. Dijkstra',
     url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+    user: '66cbdb41cb3c840100a8a353',
     likes: 5,
     __v: 0
   },

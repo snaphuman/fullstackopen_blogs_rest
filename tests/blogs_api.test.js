@@ -1,4 +1,4 @@
-const { test, after, beforeEach, describe } = require('node:test')
+const { test, after, beforeEach, describe, before } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
@@ -14,18 +14,7 @@ describe('blogs API', () => {
   const items = [blog1, blog2]
   let token = null;
 
-  beforeEach(async () => {
-    await Blog.deleteMany({})
-
-    const blogPromises = items.map(async (item) => {
-      const blogObj = new Blog(item)
-      return blogObj.save()
-    })
-
-    await Promise.all(blogPromises)
-  })
-
-  beforeEach(async() => {
+  before(async() => {
     const body = {
       "username": "root",
       "password": "mySecret"
@@ -37,6 +26,18 @@ describe('blogs API', () => {
 
     token = login.body.token
   })
+
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+
+    const blogPromises = items.map(async (item) => {
+      const blogObj = new Blog(item)
+      return blogObj.save()
+    })
+
+    await Promise.all(blogPromises)
+  })
+
 
   describe('/api/blogs', () => {
     test('get blogs should response as JSON', async () => {
@@ -82,6 +83,22 @@ describe('blogs API', () => {
 
       assert.strictEqual(blogs.length, 3)
       assert(titles.includes('Canonical string reduction'))
+    })
+
+    test('post blog should fail if no token provided', async () => {
+      const user = await usersInDb();
+      const blog = {...blogsMock[2], userId: user[0].id.toString()}
+
+      const response = await api
+        .post('/api/blogs')
+        .send(blog)
+        .expect(401)
+        .expect('Content-Type', /application\/json/)
+
+      const blogs = await blogsInDb()
+
+      assert.strictEqual(blogs.length, 2)
+      assert.strictEqual(response.body.error, 'token no provided')
     })
 
     test('post blog without title is not added', async () => {

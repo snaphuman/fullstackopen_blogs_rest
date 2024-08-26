@@ -15,7 +15,7 @@ describe('users API', () => {
         await User.deleteMany({})
         
         const passwordHash = await bcrypt.hash('mySecret', 10);
-        const user = new User({ username: 'root', passwordHash})
+        const user = new User({ username: 'root', passwordHash, _id: '66cbdb41cb3c840100a8a353'})
 
         await user.save()
     })
