@@ -9,6 +9,7 @@ const User = require('../models/user')
 const { usersInDb } = require('./users_api_helper.test')
 
 describe('users API', () => {
+    let token = ''
 
     beforeEach(async() => {
         await User.deleteMany({})
@@ -17,6 +18,19 @@ describe('users API', () => {
         const user = new User({ username: 'root', passwordHash})
 
         await user.save()
+    })
+
+    beforeEach(async() => {
+        const body = {
+          "username": "root",
+          "password": "mySecret"
+        }
+
+        const login = await api
+          .post('/api/login')
+          .send(body)
+
+        token = login.body.token
     })
 
     describe('/api/users', () => {
@@ -31,6 +45,7 @@ describe('users API', () => {
 
             const result = await api
                 .post('/api/users')
+                .set('Authorization', `Bearer ${token}`)
                 .send(user)
                 .expect(201)
                 .expect('Content-Type', /application\/json/)
@@ -53,6 +68,7 @@ describe('users API', () => {
 
             const result = await api
                 .post('/api/users')
+                .set('Authorization', `Bearer ${token}`)
                 .send(user)
                 .expect(400)
                 .expect('Content-Type', /application\/json/)
@@ -74,6 +90,7 @@ describe('users API', () => {
 
             const result = await api
                 .post('/api/users')
+                .set('Authorization', `Bearer ${token}`)
                 .send(user)
                 .expect(401)
                 .expect('Content-Type', /application\/json/)
@@ -95,6 +112,7 @@ describe('users API', () => {
 
             const result = await api
                 .post('/api/users')
+                .set('Authorization', `Bearer ${token}`)
                 .send(user)
                 .expect(401)
                 .expect('Content-Type', /application\/json/)
