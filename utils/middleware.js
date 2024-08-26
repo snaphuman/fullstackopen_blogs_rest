@@ -61,10 +61,29 @@ const tokenVerifier = (req, res, next) => {
   next()
 }
 
+const userExtractor = (req, res, next) => {
+  const token = req.token
+  const isLogin = req.originalUrl.endsWith('login')
+
+  if (!isLogin && !token)  {
+    return res.status(401).json({ error: 'token no provided'})
+  }
+
+  if (!isLogin) {
+    const decoded = jwt.decode(token)
+    console.log('decoded', decoded)
+
+    req.user = decoded;
+  }
+
+  next()
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
   tokenExtractor,
   tokenVerifier,
+  userExtractor,
 }

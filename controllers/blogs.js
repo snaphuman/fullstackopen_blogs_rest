@@ -2,6 +2,7 @@ const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const { userExtractor } = require('../utils/middleware')
 
 router.get('/', async (req, res) => {
   const blogs = await Blog.find({})
@@ -43,19 +44,18 @@ router.post('/', async (req, res) => {
   res.status(201).json(result)
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', userExtractor, async (req, res) => {
   if(!req.verifiedToken.id) {
     return res.status(401).json({error: 'token invalid'})
   }
 
   const blog = await Blog.findById(req.params.id)
-  const decodedToken = jwt.decode(req.token)
 
   if(!blog) {
     return res.status(401).json({error: 'blog not found'})
   }
 
-  if(decodedToken.id !== blog.user.toString()) {
+  if(req.user.id !== blog.user.toString()) {
     return res.status(401).json({error: 'no authorized to delete this blog'})
   }
 
