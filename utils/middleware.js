@@ -71,7 +71,6 @@ const userExtractor = (req, res, next) => {
 
   if (!isLogin) {
     const decoded = jwt.decode(token)
-    console.log('decoded', decoded)
 
     req.user = decoded;
   }

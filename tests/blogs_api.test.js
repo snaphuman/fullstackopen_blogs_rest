@@ -12,6 +12,7 @@ const { usersInDb } = require('./users_api_helper.test')
 describe('blogs API', () => {
   const [blog1, blog2] = blogsMock
   const items = [blog1, blog2]
+  let token = null;
 
   beforeEach(async () => {
     await Blog.deleteMany({})
@@ -24,23 +25,42 @@ describe('blogs API', () => {
     await Promise.all(blogPromises)
   })
 
+  beforeEach(async() => {
+    const body = {
+      "username": "root",
+      "password": "mySecret"
+    }
+
+    const login = await api
+      .post('/api/login')
+      .send(body)
+
+    token = login.body.token
+  })
+
   describe('/api/blogs', () => {
     test('get blogs should response as JSON', async () => {
       await api
         .get('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
         .expect('Content-Type', /application\/json/)
     })
 
     test('blogs identifier should be id', async () => {
-      const response = await api.get('/api/blogs')
+      const response = await api
+        .get('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
+
       response.body.forEach(blog =>
         assert.strictEqual(blog.hasOwnProperty('id'), true)
       )
     })
 
     test('get blogs should return two elements', async () => {
-      const response = await api.get('/api/blogs')
+      const response = await api
+        .get('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
 
       assert.strictEqual(response.body.length, 2)
     })
@@ -52,6 +72,7 @@ describe('blogs API', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(blog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -76,6 +97,7 @@ describe('blogs API', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(badBlog)
         .expect (400)
 
@@ -96,6 +118,7 @@ describe('blogs API', () => {
 
       const response = await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(badBlog)
         .expect(400)
 
@@ -117,6 +140,7 @@ describe('blogs API', () => {
 
       const result = await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(noLikesBlog)
         .expect(201)
 
@@ -129,7 +153,9 @@ describe('blogs API', () => {
   describe('/api/blogs/:id', () => {
     test('get one blog by id', async () => {
       const id = '5a422a851b54a676234d17f7'
-      const response = await api.get(`/api/blogs/${id}`)
+      const response = await api
+        .get(`/api/blogs/${id}`)
+        .set('Authorization', `Bearer ${token}`)
 
       assert.strictEqual(response.body.title, 'React patterns')
     })
@@ -138,6 +164,7 @@ describe('blogs API', () => {
       const id = '5a422a851b54a676234d17f7'
       await api
         .delete(`/api/blogs/${id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204)
 
       const blogs = await blogsInDb()
@@ -154,6 +181,7 @@ describe('blogs API', () => {
 
       const response = await api
         .put(`/api/blogs/${id}`)
+        .set('Authorization', `Bearer ${token}`)
         .send(update)
 
       assert.strictEqual(response.body.title, title)

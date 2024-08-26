@@ -4,6 +4,7 @@ const blogsMock = [
     title: 'React patterns',
     author: 'Michael Chan',
     url: 'https://reactpatterns.com/',
+    user: '66cbcac17838c3bf4093a728',
     likes: 7,
     __v: 0
   },

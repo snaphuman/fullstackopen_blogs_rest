@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
     return res.status(401).json({error: 'token invalid'})
   }
 
-  const user = await User.findById(decoded.id)
+  const user = await User.findById(req.user.id)
 
   const blog = new Blog({
     title,
